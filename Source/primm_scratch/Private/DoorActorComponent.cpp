@@ -18,8 +18,16 @@ UDoorActorComponent::UDoorActorComponent()
 void UDoorActorComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	FRotator DesiredRotation(0.0f, 90.0f, 0.0f);
-	GetOwner()->SetActorRotation(DesiredRotation);
+	/*DesiredRotation = FRotator(0.0f, 90.0f, 0.0f);
+	DeltaRotation = DesiredRotation - GetOwner()->GetActorRotation();
+	FinalRotation = GetOwner()->GetActorRotation() + DesiredRotation;*/
+
+	StartRotation = GetOwner()->GetActorRotation();
+	FinalRotation = StartRotation + DesiredRotation;
+
+	CurrentRotationTime = 0.0f;
+
+	//GetOwner()->SetActorRotation(DesiredRotation);
 
 	// ...
 	
@@ -30,6 +38,21 @@ void UDoorActorComponent::BeginPlay()
 void UDoorActorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (CurrentRotationTime < TimeToRotate)
+	{
+		CurrentRotationTime += DeltaTime;
+		const float RotationAlpha = FMath::Clamp(CurrentRotationTime / TimeToRotate, 0.0f, 1.0f);
+		const FRotator CurrentRotation = FMath::Lerp(StartRotation, FinalRotation, RotationAlpha);
+		GetOwner()->SetActorRotation(CurrentRotation);
+	}
+
+
+	/*FRotator CurrentRotation = GetOwner()->GetActorRotation();
+	if (!CurrentRotation.Equals(FinalRotation, 5.0f))
+	{
+		CurrentRotation += DeltaRotation * DeltaTime;
+		GetOwner()->SetActorRotation(CurrentRotation);
+	}*/
 
 	// ...
 }
