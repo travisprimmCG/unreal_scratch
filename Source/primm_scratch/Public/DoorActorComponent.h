@@ -8,6 +8,16 @@
 #include "DoorActorComponent.generated.h"
 
 class ATriggerBox;
+class IConsoleVariable;
+
+UENUM()
+enum class EDoorState
+{
+	DS_Closed = 0	UMETA(DisplayName = "Closed"),
+	DS_Opening = 1	UMETA(DisplayName = "Opening"),
+	DS_Open = 2		UMETA(DisplayName = "Open"),
+	DS_Locked = 3	UMETA(DisplayName = "Locked"),
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PRIMM_SCRATCH_API UDoorActorComponent : public UActorComponent
@@ -19,6 +29,14 @@ public:
 	UDoorActorComponent();
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	DECLARE_EVENT(FDoorInteractionComponent, FOpened)
+	FOpened& OnOpened() { return OpenedEvent; }
+	FOpened OpenedEvent;
+
+	static void OnDebugToggled(IConsoleVariable* Var);
+	void DebugDraw();
+	void OnDoorOpen();
 
 protected:
 	// Called when the game starts
@@ -40,4 +58,7 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	FRuntimeFloatCurve OpenCurve;
+
+	UPROPERTY(BlueprintReadOnly)
+	EDoorState DoorState;
 };
