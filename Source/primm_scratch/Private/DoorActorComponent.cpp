@@ -40,13 +40,6 @@ void UDoorActorComponent::BeginPlay()
 	FinalRotation = StartRotation + DesiredRotation;
 
 	CurrentRotationTime = 0.0f;
-
-	UObjectiveWorldSubsystem* ObjectiveWorldSubsystem = GetWorld()->GetSubsystem<UObjectiveWorldSubsystem>();
-	if (ObjectiveWorldSubsystem)
-	{
-		// In theory, we'd want the Subsystem getting access to this member variable and bind itself. This is ok for now...
-		OpenedEvent.AddUObject(ObjectiveWorldSubsystem, &UObjectiveWorldSubsystem::OnObjectiveCompleted);
-	}
 }
 
 
@@ -76,9 +69,7 @@ void UDoorActorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 		GetOwner()->SetActorRotation(CurrentRotation);
 		if (TimeRatio >= 1.0f)
 		{
-			DoorState = EDoorState::DS_Open;
-			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("DoorOpened"));
-			OpenedEvent.Broadcast();
+			OnDoorOpen();
 		}
 	}
 
@@ -99,5 +90,20 @@ void UDoorActorComponent::DebugDraw()
 		FString EnumAsString = TEXT("Door State: ") + UEnum::GetDisplayValueAsText(DoorState).ToString();
 		DrawDebugString(GetWorld(), Offset, EnumAsString, GetOwner(), FColor::Blue, 0.0f);
 	}
+}
+
+void UDoorActorComponent::OnDoorOpen()
+{
+	DoorState = EDoorState::DS_Open;
+	// This is not too great as we are having to scan for a general component to see if it exists. A door might not be an objective
+	// 1. We don't check if the Objective is active technically.
+	// 2. We could have multiple ObjectiveComponents on this DoorActor component that might not be related directly to this door open process.
+	UObjectiveComponent* ObjectiveComponent = GetOwner()->FindComponentByClass<UObjectiveComponent>();
+	if (ObjectiveComponent)
+	{
+		ObjectiveComponent->SetState(EObjectiveState::OS_Completed);
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("DoorOpened"));
+	//OpenedEvent.Broadcast();
 }
 
