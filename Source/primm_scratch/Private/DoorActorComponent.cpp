@@ -8,6 +8,8 @@
 #include "Engine/TriggerBox.h"
 #include "Engine/World.h"
 
+#include "ObjectiveWorldSubsystem.h"
+
 #include "DrawDebugHelpers.h"
 
 constexpr float FLT_METERS(float meters) { return meters * 100.0f; }
@@ -38,6 +40,13 @@ void UDoorActorComponent::BeginPlay()
 	FinalRotation = StartRotation + DesiredRotation;
 
 	CurrentRotationTime = 0.0f;
+
+	UObjectiveWorldSubsystem* ObjectiveWorldSubsystem = GetWorld()->GetSubsystem<UObjectiveWorldSubsystem>();
+	if (ObjectiveWorldSubsystem)
+	{
+		// In theory, we'd want the Subsystem getting access to this member variable and bind itself. This is ok for now...
+		OpenedEvent.AddUObject(ObjectiveWorldSubsystem, &UObjectiveWorldSubsystem::OnObjectiveCompleted);
+	}
 }
 
 
