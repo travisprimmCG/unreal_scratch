@@ -22,6 +22,10 @@ ARockDamageActor::ARockDamageActor()
 
 }
 
+void ARockDamageActor::PostActorCreated()
+{
+}
+
 // Called when the game starts or when spawned
 void ARockDamageActor::BeginPlay()
 {
@@ -33,6 +37,17 @@ void ARockDamageActor::BeginPlay()
 void ARockDamageActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (DealDamageComponent)
+	{
+		CurrentTimer += DeltaTime;
+		if (CurrentTimer >= ToggleTime)
+		{
+			ParticleSystemComponent->ToggleActive();
+			DealDamageComponent->SetActive(!DealDamageComponent->IsActive());
+			CurrentTimer = 0.0f;
+		}
+	}
 
 }
 
