@@ -8,19 +8,30 @@
 
 class UDoorActorComponent;
 
-/**
- * 
- */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDoorOpen);
+
 UCLASS()
 class PRIMM_SCRATCH_API AInteractableDoor : public AStaticMeshActor
 {
 	GENERATED_BODY()
-	
+
 public:
 	AInteractableDoor();
+	virtual void BeginPlay() override;
+
+	float InteractionTime = 5.0f;
+
+	UPROPERTY(BlueprintAssignable, Category = "Door Interaction")
+		FOnDoorOpen OnDoorOpen;
+
+	UFUNCTION(BlueprintCallable)
+		void OpenDoor();
 
 protected:
-	// NoClear to make sure the component is always set
+	UFUNCTION()
+		void OnInteractionSuccess();
+
 	UPROPERTY(EditAnywhere, NoClear)
-	UDoorActorComponent* DoorInteractionComponent;
+		UDoorActorComponent* DoorInteractionComponent;
 };
+

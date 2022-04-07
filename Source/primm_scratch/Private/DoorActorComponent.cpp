@@ -2,6 +2,7 @@
 
 
 #include "DoorActorComponent.h"
+#include "InteractableDoor.h"
 
 #include "GameFramework/Actor.h"
 #include "GameFramework/PlayerController.h"
@@ -13,6 +14,7 @@
 #include "DrawDebugHelpers.h"
 
 constexpr float FLT_METERS(float meters) { return meters * 100.0f; }
+
 
 static TAutoConsoleVariable<bool> CVarToggleDebugDoor(
 	TEXT("Abstraction.DoorInteractionComponent.Debug"),
@@ -73,7 +75,7 @@ void UDoorActorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 		}
 	}
 
-	DebugDraw();
+	//DebugDraw();
 }
 
 void UDoorActorComponent::OnDebugToggled(IConsoleVariable* Var)
@@ -81,16 +83,16 @@ void UDoorActorComponent::OnDebugToggled(IConsoleVariable* Var)
 	UE_LOG(LogTemp, Warning, TEXT("OnDebugToggled"));
 }
 
-void UDoorActorComponent::DebugDraw()
-{
-	if (CVarToggleDebugDoor->GetBool())
-	{
-		FVector Offset(FLT_METERS(-0.75f), 0.0f, FLT_METERS(2.5f));
-		FVector StartLocation = GetOwner()->GetActorLocation() + Offset;
-		FString EnumAsString = TEXT("Door State: ") + UEnum::GetDisplayValueAsText(DoorState).ToString();
-		DrawDebugString(GetWorld(), Offset, EnumAsString, GetOwner(), FColor::Blue, 0.0f);
-	}
-}
+//void UDoorActorComponent::DebugDraw()
+//{
+//	if (CVarToggleDebugDoor->GetBool())
+//	{
+//		FVector Offset(FLT_METERS(-0.75f), 0.0f, FLT_METERS(2.5f));
+//		FVector StartLocation = GetOwner()->GetActorLocation() + Offset;
+//		FString EnumAsString = TEXT("Door State: ") + UEnum::GetDisplayValueAsText(DoorState).ToString();
+//		DrawDebugString(GetWorld(), Offset, EnumAsString, GetOwner(), FColor::Blue, 0.0f);
+//	}
+//}
 
 void UDoorActorComponent::OnDoorOpen()
 {
@@ -104,6 +106,9 @@ void UDoorActorComponent::OnDoorOpen()
 		ObjectiveComponent->SetState(EObjectiveState::OS_Completed);
 	}
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("DoorOpened"));
+	//AAbstractionPlayerCharacter* PlayerCharacter = Cast<AAbstractionPlayerCharacter>(OtherActor);
+
+	Cast<AInteractableDoor>(GetOwner())->OpenDoor();
 	//OpenedEvent.Broadcast();
 }
 
