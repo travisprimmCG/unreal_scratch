@@ -32,6 +32,15 @@ UDoorActorComponent::UDoorActorComponent()
 	CVarToggleDebugDoor.AsVariable()->SetOnChangedCallback(FConsoleVariableDelegate::CreateStatic(&UDoorActorComponent::OnDebugToggled));
 }
 
+void UDoorActorComponent::InteractionStart()
+{
+	Super::InteractionStart();
+	if (InteractingActor)
+	{
+		OpenDoor();
+	}
+}
+
 
 // Called when the game starts
 void UDoorActorComponent::BeginPlay()
@@ -41,6 +50,17 @@ void UDoorActorComponent::BeginPlay()
 	StartRotation = GetOwner()->GetActorRotation();
 	FinalRotation = StartRotation + DesiredRotation;
 
+	CurrentRotationTime = 0.0f;
+}
+
+void UDoorActorComponent::OpenDoor()
+{
+	if (IsOpen() || DoorState == EDoorState::DS_Opening)
+	{
+		return;
+	}
+
+	DoorState = EDoorState::DS_Opening;
 	CurrentRotationTime = 0.0f;
 }
 
@@ -71,11 +91,23 @@ void UDoorActorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 		GetOwner()->SetActorRotation(CurrentRotation);
 		if (TimeRatio >= 1.0f)
 		{
-			OnDoorOpen();
+			OnDoorOpened();
 		}
 	}
 
 	//DebugDraw();
+}
+
+void UDoorActorComponent::OnDoorOpened()
+{
+	DoorState = EDoorState::DS_Open;
+	UObjectiveComponent* ObjectiveComponent = GetOwner()->FindComponentByClass<UObjectiveComponent>();
+	if (ObjectiveComponent)
+	{
+		ObjectiveComponent->SetState(EObjectiveState::OS_Completed);
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("DoorOpened"));
+	InteractionSuccess.Broadcast();
 }
 
 void UDoorActorComponent::OnDebugToggled(IConsoleVariable* Var)
@@ -83,32 +115,32 @@ void UDoorActorComponent::OnDebugToggled(IConsoleVariable* Var)
 	UE_LOG(LogTemp, Warning, TEXT("OnDebugToggled"));
 }
 
-//void UDoorActorComponent::DebugDraw()
-//{
-//	if (CVarToggleDebugDoor->GetBool())
-//	{
-//		FVector Offset(FLT_METERS(-0.75f), 0.0f, FLT_METERS(2.5f));
-//		FVector StartLocation = GetOwner()->GetActorLocation() + Offset;
-//		FString EnumAsString = TEXT("Door State: ") + UEnum::GetDisplayValueAsText(DoorState).ToString();
-//		DrawDebugString(GetWorld(), Offset, EnumAsString, GetOwner(), FColor::Blue, 0.0f);
-//	}
-//}
-
-void UDoorActorComponent::OnDoorOpen()
+void UDoorActorComponent::DebugDraw()
 {
-	DoorState = EDoorState::DS_Open;
-	// This is not too great as we are having to scan for a general component to see if it exists. A door might not be an objective
-	// 1. We don't check if the Objective is active technically.
-	// 2. We could have multiple ObjectiveComponents on this DoorActor component that might not be related directly to this door open process.
-	UObjectiveComponent* ObjectiveComponent = GetOwner()->FindComponentByClass<UObjectiveComponent>();
-	if (ObjectiveComponent)
+	if (CVarToggleDebugDoor->GetBool())
 	{
-		ObjectiveComponent->SetState(EObjectiveState::OS_Completed);
+		FVector Offset(FLT_METERS(-0.75f), 0.0f, FLT_METERS(2.5f));
+		FVector StartLocation = GetOwner()->GetActorLocation() + Offset;
+		FString EnumAsString = TEXT("Door State: ") + UEnum::GetDisplayValueAsText(DoorState).ToString();
+		DrawDebugString(GetWorld(), Offset, EnumAsString, GetOwner(), FColor::Blue, 0.0f);
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("DoorOpened"));
-	//AAbstractionPlayerCharacter* PlayerCharacter = Cast<AAbstractionPlayerCharacter>(OtherActor);
-
-	Cast<AInteractableDoor>(GetOwner())->OpenDoor();
-	//OpenedEvent.Broadcast();
 }
+
+//void UDoorActorComponent::OnDoorOpen_tp()
+//{
+//	DoorState = EDoorState::DS_Open;
+//	// This is not too great as we are having to scan for a general component to see if it exists. A door might not be an objective
+//	// 1. We don't check if the Objective is active technically.
+//	// 2. We could have multiple ObjectiveComponents on this DoorActor component that might not be related directly to this door open process.
+//	UObjectiveComponent* ObjectiveComponent = GetOwner()->FindComponentByClass<UObjectiveComponent>();
+//	if (ObjectiveComponent)
+//	{
+//		ObjectiveComponent->SetState(EObjectiveState::OS_Completed);
+//	}
+//	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("DoorOpened"));
+//	//AAbstractionPlayerCharacter* PlayerCharacter = Cast<AAbstractionPlayerCharacter>(OtherActor);
+//
+//	Cast<AInteractableDoor>(GetOwner())->OpenDoor();
+//	//OpenedEvent.Broadcast();
+//}
 

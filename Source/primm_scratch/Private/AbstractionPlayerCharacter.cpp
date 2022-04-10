@@ -30,6 +30,16 @@ void AAbstractionPlayerCharacter::OnDeath(bool IsFellOut)
 	}
 }
 
+void AAbstractionPlayerCharacter::StartInteraction()
+{
+	OnInteractionStart.Broadcast();
+}
+
+void AAbstractionPlayerCharacter::StopInteraction()
+{
+	OnInteractionCancel.Broadcast();
+}
+
 // Called every frame
 void AAbstractionPlayerCharacter::Tick(float DeltaTime)
 {
@@ -41,6 +51,11 @@ void AAbstractionPlayerCharacter::Tick(float DeltaTime)
 void AAbstractionPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	FInputActionBinding* Binding;
+
+	Binding = &PlayerInputComponent->BindAction(FName("InteractionStart"), IE_Pressed, this, &AAbstractionPlayerCharacter::StartInteraction);
+	Binding = &PlayerInputComponent->BindAction(FName("InteractionCancel"), IE_Pressed, this, &AAbstractionPlayerCharacter::StopInteraction);
 
 }
 
@@ -62,5 +77,9 @@ float AAbstractionPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent c
 		}
 	}
 	return Damage;
+}
+
+void AAbstractionPlayerCharacter::SetOnFire(UParticleSystemComponent* FireParticleSystemComponent)
+{
 }
 

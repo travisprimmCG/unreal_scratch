@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Curves/CurveFloat.h"
+#include "InteractionComponent.h"
 #include "DoorActorComponent.generated.h"
 
 class ATriggerBox;
@@ -20,7 +21,7 @@ enum class EDoorState
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PRIMM_SCRATCH_API UDoorActorComponent : public UActorComponent
+class PRIMM_SCRATCH_API UDoorActorComponent : public UInteractionComponent
 {
 	GENERATED_BODY()
 
@@ -31,13 +32,22 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	static void OnDebugToggled(IConsoleVariable* Var);
-	
+
 	UFUNCTION(BlueprintCallable)
-	void OnDoorOpen();
+	void OpenDoor();
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+	void InteractionStart() override;
+
+	void OnDoorOpened();
+
+	UFUNCTION(BlueprintCallable)
+	bool IsOpen() { return DoorState == EDoorState::DS_Open; }
+	void DebugDraw();
+
 
 	UPROPERTY(EditAnywhere)
 	FRotator DesiredRotation = FRotator::ZeroRotator;

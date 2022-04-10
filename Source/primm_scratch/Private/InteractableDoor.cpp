@@ -3,26 +3,26 @@
 
 #include "InteractableDoor.h"
 #include "DoorActorComponent.h"
+#include "Components/CapsuleComponent.h"
 
-AInteractableDoor::AInteractableDoor()
+AInteractableDoor::AInteractableDoor() : Super()
 {
 	DoorInteractionComponent = CreateDefaultSubobject<UDoorActorComponent>(TEXT("DoorInteractionComponent"));
-	//if (DoorInteractionComponent->GetTriggerCapsule())
-	//{
-	//	DoorInteractionComponent->GetTriggerCapsule()->SetupAttachment(RootComponent);
-	//}
+	if (DoorInteractionComponent->GetTriggerCapsule())
+	{
+		DoorInteractionComponent->GetTriggerCapsule()->SetupAttachment(RootComponent);
+	}
 }
 
 void AInteractableDoor::BeginPlay()
 {
 	Super::BeginPlay();
-	//DoorInteractionComponent->InteractionSuccess.AddDynamic(this, &AInteractableDoor::OnInteractionSuccess);
+	DoorInteractionComponent->InteractionSuccess.AddDynamic(this, &AInteractableDoor::OnInteractionSuccess);
 }
 
 void AInteractableDoor::OpenDoor()
 {
-	//DoorInteractionComponent->OnDoorOpen();
-	OnDoorOpen.Broadcast();
+	DoorInteractionComponent->OpenDoor();
 }
 
 void AInteractableDoor::OnInteractionSuccess()

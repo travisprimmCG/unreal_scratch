@@ -22,16 +22,16 @@ public:
 	float InteractionTime = 5.0f;
 
 	UPROPERTY(BlueprintAssignable, Category = "Door Interaction")
-		FOnDoorOpen OnDoorOpen;
+	FOnDoorOpen OnDoorOpen;
 
 	UFUNCTION(BlueprintCallable)
-		void OpenDoor();
+	void OpenDoor();
 
 protected:
 	UFUNCTION()
-		void OnInteractionSuccess();
+	void OnInteractionSuccess();
 
 	UPROPERTY(EditAnywhere, NoClear)
-		UDoorActorComponent* DoorInteractionComponent;
+	UDoorActorComponent* DoorInteractionComponent;
 };
 
